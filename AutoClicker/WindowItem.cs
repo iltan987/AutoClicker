@@ -2,17 +2,14 @@
 
 namespace AutoClicker
 {
-    public partial class Form1
+    public class WindowItem
     {
-        private class WindowItem
-        {
-            public IntPtr Handle { get; set; }
-            public string Title { get; set; }
+        public IntPtr Handle { get; set; }
+        public string Title { get; set; }
 
-            public override string ToString()
-            {
-                return Title;
-            }
+        public override string ToString()
+        {
+            return Title;
         }
     }
 }

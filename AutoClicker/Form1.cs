@@ -27,26 +27,12 @@ namespace AutoClicker
             windowComboBox.Items.Clear();
             NativeMethods.EnumWindows((hWnd, lParam) =>
             {
-                int length = NativeMethods.GetWindowTextLength(hWnd);
-                if (length == 0) return true;
-
-                StringBuilder builder = new StringBuilder(length);
-                NativeMethods.GetWindowText(hWnd, builder, length + 1);
-
-                windowComboBox.Items.Add(new WindowItem { Handle = hWnd, Title = builder.ToString() });
+                AddWindowToComboBox(hWnd);
                 NativeMethods.EnumChildWindows(hWnd, (childHWnd, childLParam) =>
                 {
-                    int childLength = NativeMethods.GetWindowTextLength(childHWnd);
-                    if (childLength == 0) return true;
-
-                    StringBuilder childBuilder = new StringBuilder(childLength);
-                    NativeMethods.GetWindowText(childHWnd, childBuilder, childLength + 1);
-
-                    windowComboBox.Items.Add(new WindowItem { Handle = childHWnd, Title = builder.ToString() + " - " + childBuilder.ToString() });
-
+                    AddWindowToComboBox(childHWnd, hWnd);
                     return true;
                 }, IntPtr.Zero);
-
                 return true;
             }, IntPtr.Zero);
 
@@ -54,6 +40,26 @@ namespace AutoClicker
             {
                 windowComboBox.SelectedIndex = 0;
             }
+        }
+
+        private void AddWindowToComboBox(IntPtr hWnd, IntPtr parentHWnd = default)
+        {
+            int length = NativeMethods.GetWindowTextLength(hWnd);
+            if (length == 0) return;
+
+            StringBuilder builder = new StringBuilder(length);
+            NativeMethods.GetWindowText(hWnd, builder, length + 1);
+
+            string title = builder.ToString();
+            if (parentHWnd != default)
+            {
+                int parentLength = NativeMethods.GetWindowTextLength(parentHWnd);
+                StringBuilder parentBuilder = new StringBuilder(parentLength);
+                NativeMethods.GetWindowText(parentHWnd, parentBuilder, parentLength + 1);
+                title = $"{parentBuilder} - {title}";
+            }
+
+            windowComboBox.Items.Add(new WindowItem { Handle = hWnd, Title = title });
         }
 
         private void startButton_Click(object sender, EventArgs e)
@@ -113,6 +119,5 @@ namespace AutoClicker
             NativeMethods.UnregisterHotKey(Handle, HotkeyConstants.HOTKEY_ID);
             base.OnFormClosing(e);
         }
-
     }
 }
